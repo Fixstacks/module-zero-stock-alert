@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Zero_StockAlert::report" title="Stock Alerts" translate="title" module="Zero_StockAlert" sortOrder="60"
+             parent="Magento_Reports::report_products" action="zero_stockalert/report/index" resource="Zero_StockAlert::report"/>
+    </menu>
+</config>

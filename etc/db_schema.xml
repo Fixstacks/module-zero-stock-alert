@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    Who waits for what: an email for a product (a configurable product's
+    variant: product_id the variant, parent_id the product shown) in a
+    store view, until it is notified or cancels.
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="zero_stock_alert" resource="default" engine="innodb" comment="Zero Back-in-Stock Alert">
+        <column xsi:type="int" name="alert_id" unsigned="true" nullable="false" identity="true" comment="Alert ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product Waited For"/>
+        <column xsi:type="int" name="parent_id" unsigned="true" nullable="true" comment="Configurable Product Shown"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store View"/>
+        <column xsi:type="varchar" name="email" nullable="false" length="255" comment="Email"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer"/>
+        <column xsi:type="varchar" name="token" nullable="false" length="32" comment="Cancel Token"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="10" default="waiting" comment="waiting, sent, cancelled"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="sent_at" nullable="true" comment="Sent At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="alert_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ZERO_STOCK_ALERT_TOKEN">
+            <column name="token"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ZERO_STOCK_ALERT_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID"
+                    table="zero_stock_alert" column="product_id" referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="ZERO_STOCK_ALERT_STORE_ID_STORE_STORE_ID"
+                    table="zero_stock_alert" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+        <index referenceId="ZERO_STOCK_ALERT_STATUS_PRODUCT_ID" indexType="btree">
+            <column name="status"/>
+            <column name="product_id"/>
+        </index>
+        <index referenceId="ZERO_STOCK_ALERT_EMAIL" indexType="btree">
+            <column name="email"/>
+        </index>
+    </table>
+</schema>

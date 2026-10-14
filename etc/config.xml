@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <customer>
+            <captcha>
+                <frontend>
+                    <areas>
+                        <zero_stock_alert>
+                            <label>Back in stock alert</label>
+                        </zero_stock_alert>
+                    </areas>
+                </frontend>
+            </captcha>
+        </customer>
+        <zero_stock_alert>
+            <general>
+                <enabled>1</enabled>
+                <identity>general</identity>
+                <template>zero_stock_alert_general_template</template>
+            </general>
+        </zero_stock_alert>
+    </default>
+</config>

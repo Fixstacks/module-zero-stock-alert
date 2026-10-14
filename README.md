@@ -1,0 +1,63 @@
+# Zero_StockAlert
+
+"Tell me when it's back" for sold-out products, for any visitor (no account
+needed), and one email when it is.
+
+- **Product page** (Magento's `alert.urls` place, by the price): a sold-out
+  simple product asks for an email; a configurable product with sold-out
+  variants asks which one ("M / Blue": every variant, Magento's own lists
+  leave sold-out ones out) and an email. Posted with HTMX, the answer in
+  the form's place; an address already waiting is told so. A honeypot field
+  turns bots away; one address can wait for 50 products at most.
+- **The email** (cron every 15 minutes, `zero_stock_alert_send`; now:
+  `bin/magento zero:stock-alert:send`): once the product waited for is in
+  stock, each address gets one email in the store view it asked in: the
+  product (the configurable one for a variant, the variant named), photo,
+  price, a link to it, and "Didn't ask for it?" (cancels). Template "Back in
+  Stock" (Marketing > Email Templates to customize), sender per store.
+- **Reports > Products > Stock Alerts**: products by how many wait for them,
+  notified so far, waiting since, in stock now: what to restock first.
+
+Settings: Stores > Configuration > Zero > Stock Alerts (on/off, sender,
+template). Table `zero_stock_alert` (waiting / sent / cancelled).
+
+## Install
+
+Requires Magento Open Source 2.4.7–2.4.9 and PHP 8.2–8.4.
+
+```bash
+composer require fixstacks/module-zero-stock-alert
+bin/magento setup:upgrade
+bin/magento setup:di:compile           # production mode
+bin/magento setup:static-content:deploy # production mode
+bin/magento cache:flush
+```
+
+Composer installs `fixstacks/module-zero-core` with it.
+
+Part of [`fixstacks/zero`](https://fixstacks.com/zero), which installs the Zero theme and every Zero module at once.
+
+## Tests
+
+`dev/tests/zero-e2e/tests/stock-alert.spec.ts` (on the sold-out products in
+`ZERO_SOLD_OUT_PRODUCTS`), `stock-alert-admin.spec.ts` (the report).
+
+## Disabling or removing
+
+Its data lives in its own tables (`zero_stock_alert`). With the module's code still in
+place, `bin/magento module:disable Zero_StockAlert` followed by `setup:upgrade`
+**drops those tables** (Magento's declarative schema), and enabling the module
+again brings them back empty. To keep the data, switch the feature off in
+Stores > Configuration where it has a setting, or back up first:
+`bin/magento setup:upgrade --safe-mode=1` dumps the data before anything is
+dropped (`--data-restore=1` puts it back). Deleting the module's code instead
+leaves the tables in place.
+
+## License
+
+OSL-3.0 or AFL-3.0, your choice: see `NOTICE.md`.
+
+---
+
+Zero is made by [Fixstacks](https://fixstacks.com/zero) in partnership with [Vilmate](https://vilmate.com).
+Documentation: https://fixstacks.com/zero/docs. Demo store: https://zero.fixstacks.com.

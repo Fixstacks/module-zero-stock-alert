@@ -1,0 +1,53 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * "Tell me when it's back": an email (and, for a configurable product, which
+ * sold-out variant), posted with HTMX, the answer in the form's place. The
+ * page is cached: the form key comes from Zero's session script, the email
+ * is typed. "website" is a honeypot, hidden from people.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\StockAlert\ViewModel\Form $form */
+$form = $block->getData('view_model');
+$soldOut = $form->soldOut();
+$product = $form->product();
+if (!$soldOut || !$product) {
+    return;
+}
+$variants = array_filter($soldOut, static fn ($label) => $label !== '');
+$isVariant = (bool) $variants;
+?>
+<details class="zero-stock-alert border border-base-300 p-4 my-4"<?= $isVariant ? '' : ' open' ?>>
+    <summary class="cursor-pointer text-sm font-semibold list-none [&::-webkit-details-marker]:hidden">
+        <?= $escaper->escapeHtml($isVariant ? __('Size or color sold out? Tell me when it\'s back') : __('Sold out. Tell me when it\'s back')) ?>
+    </summary>
+    <form class="flex flex-col gap-3 mt-3" method="post" action="<?= $escaper->escapeUrl($form->actionUrl()) ?>"
+          hx-post="<?= $escaper->escapeUrl($form->actionUrl()) ?>" hx-swap="outerHTML" hx-disabled-elt="find button">
+        <?= $block->getBlockHtml('formkey') ?>
+        <?php if ($isVariant): ?>
+            <input type="hidden" name="parent" value="<?= (int) $product->getId() ?>">
+            <label class="flex flex-col gap-1 text-sm">
+                <?= $escaper->escapeHtml(__('Which one')) ?>
+                <select name="product" class="select select-sm w-full" required>
+                    <?php foreach ($variants as $id => $label): ?>
+                        <option value="<?= (int) $id ?>"><?= $escaper->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        <?php else: ?>
+            <input type="hidden" name="product" value="<?= (int) array_key_first($soldOut) ?>">
+        <?php endif; ?>
+        <label class="flex flex-col gap-1 text-sm">
+            <?= $escaper->escapeHtml(__('Your email')) ?>
+            <input type="email" name="email" required autocomplete="email" class="input input-sm w-full" placeholder="you@example.com">
+        </label>
+        <label class="zero-stock-alert-trap" aria-hidden="true">Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        <?= $block->getChildHtml('captcha') ?>
+        <button type="submit" class="btn btn-sm btn-neutral self-start"><?= $escaper->escapeHtml(__('Notify me')) ?></button>
+        <p class="text-xs text-base-content/60"><?= $escaper->escapeHtml(__('One email when it\'s back, nothing else.')) ?></p>
+    </form>
+</details>

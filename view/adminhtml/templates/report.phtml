@@ -1,0 +1,42 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * Reports > Products > Stock Alerts: what customers wait for, most first.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\StockAlert\ViewModel\Report $report */
+$report = $block->getData('view_model');
+$rows = $report->rows();
+?>
+<p><?= $escaper->escapeHtml(__('Products customers asked to hear about when they are back in stock: those waited for most are worth restocking first. Emails go out within 15 minutes of a product being in stock again.')) ?></p>
+<table class="data-grid">
+    <thead>
+        <tr>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Product')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('SKU')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Waiting')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Notified')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Waiting Since')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('In Stock')) ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($rows as $row): ?>
+            <tr>
+                <td><a href="<?= $escaper->escapeUrl($report->editUrl((int) $row['product_id'])) ?>"><?= $escaper->escapeHtml($row['name']) ?></a></td>
+                <td><?= $escaper->escapeHtml($row['sku']) ?></td>
+                <td><?= (int) $row['waiting'] ?></td>
+                <td><?= (int) $row['sent'] ?></td>
+                <td><?= $escaper->escapeHtml((string) $row['since']) ?></td>
+                <td><?= $row['in_stock'] ? $escaper->escapeHtml(__('Yes')) : $escaper->escapeHtml(__('No')) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php if (!$rows): ?>
+            <tr><td colspan="6"><?= $escaper->escapeHtml(__('Nobody is waiting for a product.')) ?></td></tr>
+        <?php endif; ?>
+    </tbody>
+</table>

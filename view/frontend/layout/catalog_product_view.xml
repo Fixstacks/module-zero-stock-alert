@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    "Tell me when it's back" in Magento's place for product alerts, by the price.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="alert.urls">
+            <block class="Magento\Framework\View\Element\Template" name="zero.stock.alert" template="Zero_StockAlert::form.phtml">
+                <block class="Zero\Core\Block\Captcha\Field" name="zero.stock.alert.captcha" as="captcha">
+                    <arguments>
+                        <argument name="form_id" xsi:type="string">zero_stock_alert</argument>
+                    </arguments>
+                </block>
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Zero\StockAlert\ViewModel\Form</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

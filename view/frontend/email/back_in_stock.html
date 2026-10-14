@@ -1,0 +1,51 @@
+<!--
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<!--@subject {{trans "%product is back in stock" product=$product_name}} @-->
+<!--@vars {
+"var product_name":"Product Name",
+"var option":"Variant (e.g. M / Black)",
+"var product_url":"Product Page",
+"var image_url":"Product Image",
+"var price":"Price",
+"var cancel_url":"Cancel Link",
+"var store.frontend_name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table>
+    <tr class="email-intro">
+        <td>
+            <p>{{trans "Good news: what you asked us to tell you about is back in stock."}}</p>
+        </td>
+    </tr>
+    <tr class="email-information">
+        <td>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="width: 120px; vertical-align: top; padding-right: 16px;">
+                        <a href="{{var product_url}}"><img src="{{var image_url}}" alt="{{var product_name}}" width="120" style="display: block; max-width: 120px;"></a>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <p style="margin: 0 0 4px; font-weight: bold;"><a href="{{var product_url}}">{{var product_name}}</a></p>
+                        {{if option}}<p style="margin: 0 0 4px;">{{var option}}</p>{{/if}}
+                        <p style="margin: 0 0 12px;">{{var price|raw}}</p>
+                        <table class="button" cellspacing="0" cellpadding="0"><tr><td><table class="inner-wrapper" cellspacing="0" cellpadding="0"><tr><td>
+                            <a href="{{var product_url}}">{{trans "Shop now"}}</a>
+                        </td></tr></table></td></tr></table>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin-top: 24px; font-size: 12px; color: #666;">
+                {{trans "Stocks can sell out again quickly. You got this email because you asked for it at %store_name; we won't write about this product again." store_name=$store.frontend_name}}
+                <a href="{{var cancel_url}}">{{trans "Didn't ask for it?"}}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

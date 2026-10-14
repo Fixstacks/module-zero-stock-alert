@@ -1,0 +1,26 @@
+{
+    "zero_stock_alert": {
+        "column": {
+            "alert_id": true,
+            "product_id": true,
+            "parent_id": true,
+            "store_id": true,
+            "email": true,
+            "customer_id": true,
+            "token": true,
+            "status": true,
+            "created_at": true,
+            "sent_at": true
+        },
+        "index": {
+            "ZERO_STOCK_ALERT_STATUS_PRODUCT_ID": true,
+            "ZERO_STOCK_ALERT_EMAIL": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ZERO_STOCK_ALERT_TOKEN": true,
+            "ZERO_STOCK_ALERT_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID": true,
+            "ZERO_STOCK_ALERT_STORE_ID_STORE_STORE_ID": true
+        }
+    }
+}
