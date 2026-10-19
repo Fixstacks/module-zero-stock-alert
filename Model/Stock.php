@@ -13,6 +13,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\ObjectManagerInterface;
 
 /**
  * What can be waited for on a product page: the product itself when it can't
@@ -24,7 +25,8 @@ class Stock
     public function __construct(
         private readonly ProductRepositoryInterface $productRepository,
         private readonly StoreManagerInterface $storeManager,
-        private readonly CollectionFactory $collectionFactory
+        private readonly CollectionFactory $collectionFactory,
+        private readonly ObjectManagerInterface $objectManager
     ) {
     }
 
@@ -53,15 +55,48 @@ class Stock
                 ? [(int) $product->getId() => '']
                 : [];
         }
+        $all = array_filter($this->variants($product), static fn (array $variant) => $variant['enabled']);
+        // One question for all the variants (multi-source inventory); without it, one product load each.
+        $salable = $this->salable(array_column($all, 'sku'));
         $variants = [];
-        foreach ($this->variants($product) as $id => $variant) {
-            if ($variant['enabled'] && !$this->isInStock($id)) {
+        foreach ($all as $id => $variant) {
+            $inStock = $salable !== null ? ($salable[$variant['sku']] ?? false) : $this->isInStock($id);
+            if (!$inStock) {
                 $variants[$id] = $variant['label'];
             }
         }
         asort($variants, SORT_NATURAL);
 
         return $variants;
+    }
+
+    /**
+     * Whether each SKU can be bought now in the current website's stock, in one
+     * call (reservations counted, as on the product page); null where the
+     * inventory modules' bulk API is not there.
+     *
+     * @param string[] $skus
+     * @return array<string, bool>|null
+     */
+    private function salable(array $skus): ?array
+    {
+        $areSalable = '\\Magento\\InventorySalesApi\\Api\\AreProductsSalableInterface';
+        $resolver = '\\Magento\\InventorySalesApi\\Api\\StockResolverInterface';
+        if (!$skus || !interface_exists($areSalable) || !interface_exists($resolver)) {
+            return null;
+        }
+        try {
+            $website = $this->storeManager->getWebsite();
+            $stockId = (int) $this->objectManager->get($resolver)->execute('website', $website->getCode())->getStockId();
+            $salable = [];
+            foreach ($this->objectManager->get($areSalable)->execute(array_values($skus), $stockId) as $result) {
+                $salable[(string) $result->getSku()] = (bool) $result->isSalable();
+            }
+
+            return $salable;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
@@ -76,7 +111,7 @@ class Stock
      * Every variant, sold out or not (Magento's own list of a configurable
      * product's variants leaves sold-out ones out), named by its options.
      *
-     * @return array<int, array{label: string, enabled: bool}>
+     * @return array<int, array{label: string, enabled: bool, sku: string}>
      */
     private function variants(Product $product): array
     {
@@ -100,6 +135,7 @@ class Stock
             $variants[(int) $child->getId()] = [
                 'label' => implode(' / ', array_filter($labels)),
                 'enabled' => (int) $child->getStatus() === 1,
+                'sku' => (string) $child->getSku(),
             ];
         }
 
