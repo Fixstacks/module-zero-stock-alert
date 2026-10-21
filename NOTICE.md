@@ -1,4 +1,4 @@
-# fixstacks/module-zero-stock-alert — licensing
+# zerofront/module-zero-stock-alert — licensing
 
 Copyright © 2026 Roman Pasichnyk.
 
